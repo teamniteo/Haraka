@@ -1,28 +1,29 @@
 // Queue to qmail-queue
 
 var childproc = require('child_process');
-var net = require('net');
-var netBinding = process.binding('net');
-var fs = require('fs');
-var path = require('path');
+var fs        = require('fs');
+var path      = require('path');
+var semver    = require('semver');
 
 exports.register = function () {
     this.queue_exec = this.config.get('qmail-queue.path') || '/var/qmail/bin/qmail-queue';
     if (!path.existsSync(this.queue_exec)) {
         throw new Error("Cannot find qmail-queue binary (" + this.queue_exec + ")");
     }
+    if (!semver.gte(process.version, '0.8.0')) {
+        throw new Error("qmail_queue now only works on v0.8.0 or higher");
+    }
 };
 
 exports.hook_queue = function (next, connection) {
     var plugin = this;
-    // TODO: This will not work on 0.6 so we need to do something about that
-    var messagePipe  = netBinding.pipe();
-    var envelopePipe = netBinding.pipe();
     var qmail_queue = childproc.spawn(
         this.queue_exec, // process name
         [],              // arguments
-        { customFds: [messagePipe[0], envelopePipe[0]] }
+        { stdio: 'pipe' }
     );
+    var messagePipe  = qmail_queue.stdio[0];
+    var envelopePipe = qmail_queue.stdio[1];
     
     var finished = function (code) {
         fs.close(messagePipe[0]);
