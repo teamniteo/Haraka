@@ -706,7 +706,7 @@ Connection.prototype.connect_respond = function(retval, msg) {
                     }
                 }
                 else {
-                    greeting = config.get('me') + " ESMTP Haraka " + version + " ready";
+                    greeting = config.get('me') + " ESMTP Postfix (Ubuntu) ready";
                     if (this.banner_includes_uuid) {
                         greeting += ' (' + this.uuid + ')';
                     }
@@ -747,7 +747,7 @@ Connection.prototype.helo_respond = function(retval, msg) {
                     ((this.remote_host && this.remote_host !== 'DNSERROR' &&
                     this.remote_host !== 'NXDOMAIN') ? this.remote_host + ' ' : '') +
                     "[" + this.remote_ip + "]" +
-                    ", Haraka is at your service.");
+                    ", Postfix is at your service.");
     }
 };
 
@@ -783,7 +783,7 @@ Connection.prototype.ehlo_respond = function(retval, msg) {
                                 ((this.remote_host && this.remote_host !== 'DNSERROR' &&
                                 this.remote_host !== 'NXDOMAIN') ? this.remote_host + ' ' : '') +
                                 "[" + this.remote_ip + "]" +
-                                ", Haraka is at your service.",
+                                ", Postfix is at your service.",
                                 "PIPELINING",
                                 "8BITMIME",
                                 ];
@@ -1259,7 +1259,7 @@ Connection.prototype.received_line = function() {
         ((!/^(?:DNSERROR|NXDOMAIN)/.test(this.remote_info)) ? this.remote_info + ' ' : ''),
         '[', this.remote_ip, '])',
         "\n\t",
-        'by ', config.get('me'), ' (Haraka/', version, ') with ', smtp,
+        'by ', config.get('me'), ' (Postfix/Ubuntu) with ', smtp,
         ' id ', this.transaction.uuid,
         "\n\t",
         'envelope-from ', this.transaction.mail_from.format(),
@@ -1397,7 +1397,7 @@ Connection.prototype.accumulate_data = function(line) {
         line[1] === 0x0a)
     {
         this.logerror('Client sent bare line-feed - .\\n rather than .\\r\\n');
-        this.respond(451, "Bare line-feed; see http://haraka.github.com/barelf.html", function() {
+        this.respond(451, "Bare line-feed;", function() {
             self.reset_transaction();
         });
         return;
